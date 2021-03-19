@@ -1,0 +1,125 @@
+model ModelName
+  options explterm
+  options noimplicit
+
+  uses "mmxprs";
+
+  parameters
+    DataFile = "AutonomaxData.txt";
+  end-parameters
+  declarations
+    Cities: set of integer;
+    Scenarios: set of integer;
+    Scenario: integer;
+    Subsets: set of integer;
+
+    nCities: integer;
+    nScenarios: integer;
+    nSubsets: integer;
+    nCore: integer;
+    M: integer;
+    Z: integer;
+  end-declarations
+
+  initialisations from DataFile
+    nCities;
+    nScenarios;
+    M;
+    Scenario;
+    Z;
+    nCore;
+  end-initialisations
+
+  nSubsets := 3;
+
+  Cities := 1..nCities;
+  Scenarios := 1..nScenarios;
+  Subsets := 1..nSubsets;
+  finalize(Cities);
+  finalize(Scenarios);
+  finalize(Subsets);
+
+  declarations
+    Distance: array(Cities, Cities) of integer;
+    Scen: array(Scenarios, Cities)  of real;
+  end-declarations
+
+  initialisations from DataFile
+    Distance;
+    Scen;
+  end-initialisations
+
+  declarations
+    core_edge: dynamic array(Cities, Cities) of mpvar;
+    sub_edge: dynamic array(Cities, Cities) of mpvar;
+    bandwith: dynamic array(Cities, Cities) of mpvar;
+    core_node: dynamic array(Cities) of mpvar;
+    control_node: dynamic array(Cities) of mpvar;
+  end-declarations
+
+  ! Create all variables
+  forall (c1 in Cities) do
+    create(core_node(c1));
+    core_node(c1) is_binary;
+
+    create(control_node(c1));
+    control_node(c1) is_binary;
+
+    forall (c2 in Cities) do
+      if (c1 <> c2) then
+        create(core_edge(c1, c2));
+        core_edge(c1, c2) is_binary;
+
+        create(sub_edge(c1, c2));
+        sub_edge(c1, c2) is_binary;
+
+        create(bandwith(c1, c2));
+        bandwith(c1, c2) is_continuous;
+      end-if
+    end-do
+  end-do
+
+  declarations
+    ! For all i,j
+    const1: dynamic array(Cities, Cities) of linctr;
+    const2: dynamic array(Cities, Cities) of linctr;
+    const3: dynamic array(Cities, Cities) of linctr;
+    const4: dynamic array(Cities) of linctr;
+    const5: dynamic array(Cities, Cities) of linctr;
+    const6: linctr;
+    const7: dynamic array(Subsets) of linctr;
+    const8: linctr;
+    const9: linctr;
+    const10: dynamic array(Cities) of linctr;
+    const11: dynamic array(Cities) of linctr;
+    MinimumCost: linctr;
+  end-declarations
+
+
+  forall(i in Cities) do
+    const4(i) := (sum(n in Cities | n <> i)sub_edge(n, i) )= 1 - core_node(i);
+    const10(i) := control_node(i) <= core_node(i); 
+    const11(i) := sum(n in Cities | n <> i)core_edge(n, i) + sum(n in Cities | n <> i)sub_edge(n, i) + control_node(i) >= 1;
+    forall(j in Cities) do
+      if (i <> j) then
+        const1(i, j) := core_edge(i,j) + sub_edge(i,j) <= 1;
+        const2(i, j) := bandwith(i,j) >= sum(n in Cities | n <> j)bandwith(j,n) + Scen(Scenario, j) - M*(1-sub_edge(i,j));
+        const3(i, j) := bandwith(i,j) <= M*sub_edge(i,j);
+        const5(i,j) := 2*core_edge(i,j) <= core_node(i) + core_node(j); ! we changed this Siggiboi
+      end-if
+    end-do
+  end-do
+
+
+
+  const6 := sum(i in Cities, j in Cities | i <> j)core_edge(i,j) = sum(i in Cities)core_node(i) - (1-Z);
+  const8 :=sum(i in Cities)core_node(i)=nCore;
+  const9 := sum(i in Cities)control_node(i) = 1;
+  writeln(nCore);
+  setparam('xprs_verbose',true);
+
+  MinimumCost := sum(i in Cities, j in Cities | i <> j)(10*core_edge(i,j)*Distance(i,j) + 10*sub_edge(i,j) + (0.1*Distance(i,j))^1.5*bandwith(i,j));
+  minimize(MinimumCost);
+
+end-model
+

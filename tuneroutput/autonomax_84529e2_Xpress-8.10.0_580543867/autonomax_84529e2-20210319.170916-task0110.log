@@ -1,0 +1,18 @@
+==> OUTPUTLOG            = 1
+==> MUTEXCALLBACKS       = 0
+==> HEURSEARCHROOTSELECT = 5
+==> HEURSEARCHTREESELECT = 0
+FICO Xpress v8.10.0, Hyper, solve started 17:09:18, Mar 19, 2021
+Heap usage: 2330KB (peak 2330KB, 3812KB system)
+Minimizing MILP /xprs_1029d7008
+Original problem has:
+      6686 rows         5002 cols        87207 elements      3362 globals
+ 
+ 
+The problem is infeasible due to row R1
+Presolve finished in 0 seconds
+Heap usage: 2331KB (peak 7745KB, 3814KB system)
+ *** Search completed ***
+Problem is integer infeasible
+  Solution time / primaldual integral :         0s/ 100.000000%
+  Number of solutions found / nodes   :         0 /         0

@@ -1,0 +1,34 @@
+==> PRESOLVE             = 0
+==> OUTPUTLOG            = 1
+==> MUTEXCALLBACKS       = 0
+FICO Xpress v8.10.0, Hyper, solve started 17:09:16, Mar 19, 2021
+Heap usage: 2330KB (peak 2330KB, 3646KB system)
+Minimizing MILP /xprs_1029d7008
+Original problem has:
+      6686 rows         5002 cols        87207 elements      3362 globals
+
+Coefficient range                    original                 solved        
+  Coefficients   [min,max] : [ 1.00e+00,  1.00e+04] / [ 5.00e-01,  1.22e+00]
+  RHS and bounds [min,max] : [ 1.00e+00, 10.00e+03] / [ 1.00e+00,  1.22e+00]
+  Objective      [min,max] : [ 3.04e+00,  1.60e+04] / [ 1.00e+01,  1.65e+07]
+Autoscaling applied standard scaling
+
+Will try to keep branch and bound tree memory usage below 7.5GB
+Starting concurrent solve with dual, primal and barrier (2 threads)
+
+                           Concurrent-Solve,   0s
+            Dual                      Primal                     Barrier      
+    objective   dual inf                                                      
+ D  4015.0000   .0000000 |                          |                         
+------ infeasible ------ | ----- interrupted ------ | ----- interrupted ------
+Concurrent statistics:
+      Dual: 299 simplex iterations, 0.09s
+    Primal: 124 simplex iterations, 0.03s
+   Barrier: 0 barrier and 0 simplex iterations, 0.08s
+            Barrier used 2 threads 2 cores, L1\L2 cache: 32K\3072K
+            Barrier used AVX support
+Problem is infeasible
+ *** Search completed ***
+Problem is integer infeasible
+  Solution time / primaldual integral :         0s/ 100.000000%
+  Number of solutions found / nodes   :         0 /         0
