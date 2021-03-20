@@ -1,8 +1,9 @@
 import itertools
 import numpy as np
+import sys
 
-nCities = 41
-nCores = 8
+nCities = int(sys.argv[1])
+nCores = int(sys.argv[2])
 maxSize=int(np.floor(nCores/2))
 
 cities = np.arange(1, nCities + 1)
