@@ -30,6 +30,10 @@ model ModelName
     nCore;
   end-initialisations
 
+  function calculate_subsets(n:integer):integer
+    returned:= n*3;
+  end-function
+
   nSubsets := 3;
 
   Cities := 1..nCities;
@@ -92,14 +96,16 @@ model ModelName
     const9: linctr;
     const10: dynamic array(Cities) of linctr;
     const11: dynamic array(Cities) of linctr;
+    const12: dynamic array(Cities) of linctr;
     MinimumCost: linctr;
   end-declarations
 
 
   forall(i in Cities) do
     const4(i) := (sum(n in Cities | n <> i)sub_edge(n, i) )= 1 - core_node(i);
-    const10(i) := control_node(i) <= core_node(i); 
+    const10(i) := control_node(i) <= core_node(i);
     const11(i) := sum(n in Cities | n <> i)core_edge(n, i) + sum(n in Cities | n <> i)sub_edge(n, i) + control_node(i) >= 1;
+    const12(i) := core_node(i) <= sum(n in Cities | n <> i)core_edge(i, n) + sum(n in Cities | n <> i)core_edge(n, i);
     forall(j in Cities) do
       if (i <> j) then
         const1(i, j) := core_edge(i,j) + sub_edge(i,j) <= 1;
@@ -117,9 +123,62 @@ model ModelName
   const9 := sum(i in Cities)control_node(i) = 1;
   writeln(nCore);
   setparam('xprs_verbose',true);
+  setparam('xprs_maxtime', -60);
 
   MinimumCost := sum(i in Cities, j in Cities | i <> j)(10*core_edge(i,j)*Distance(i,j) + 10*sub_edge(i,j) + (0.1*Distance(i,j))^1.5*bandwith(i,j));
   minimize(MinimumCost);
+
+
+  fopen("out.txt",F_OUTPUT);
+
+  writeln("Control center:");
+  forall (c in Cities) do
+    if (not getsol(control_node(c))=0) then
+      writeln(getsol(control_node(c)));
+    end-if
+  end-do
+
+  writeln("Cities in the core net:");
+  forall (c in Cities) do
+    if (not getsol(core_node(c))=0) then
+      writeln(c);
+    end-if
+  end-do
+
+
+  writeln("Arcs in the corenet");
+  forall (i in Cities) do
+    forall (j in Cities | j <> i) do
+      if (not getsol(core_edge(i,j))=0) then
+        writeln("(",i,",",j,")");
+      end-if
+    end-do
+  end-do
+
+  writeln("Arcs in the subnet");
+  forall (i in Cities) do
+    forall (j in Cities | j <> i) do
+      if (not getsol(sub_edge(i,j))=0) then
+        writeln("(",i,",",j,")");
+      end-if
+    end-do
+  end-do
+
+  writeln("Bandwith in the subnet");
+  forall (i in Cities) do
+    forall (j in Cities | j <> i) do
+      if (not getsol(bandwith(i,j))=0) then
+        writeln(getsol(bandwith(i,j)));
+      end-if
+    end-do
+  end-do
+
+  fclose(F_OUTPUT);
+  writeln("Objective function value:", getobjval);
+
+
+
+
 
 end-model
 
