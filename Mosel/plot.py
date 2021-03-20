@@ -19,15 +19,17 @@ with open('out.txt','r') as f:
             line = f.readline()
             continue
         if state == stop_word[0]:
-            control_center = eval(line)
+            control_center = int(line)
         if state == stop_word[1]:
-            core_nodes.append(eval(line))
+            core_nodes.append(int(line))
         if state == stop_word[2]:
-            core_edges.append(eval(line))
+            edge = line.split(",")
+            core_edges.append((int(edge[0]),int(edge[1])))
         if state == stop_word[3]:
-            sub_edges.append(eval(line))
+            edge = line.split(",")
+            sub_edges.append((int(edge[0]),int(edge[1])))
         if state == stop_word[4]:
-            bandwith.append(eval(line))
+            bandwith.append(float(line))
         line = f.readline()
 
 
