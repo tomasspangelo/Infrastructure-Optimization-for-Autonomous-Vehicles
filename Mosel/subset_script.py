@@ -8,7 +8,7 @@ maxSize=int(np.floor(nCores/2))
 
 cities = np.arange(1, nCities + 1)
 
-f = open("subsets"+str(maxSize)+".txt", "w")
+f = open("subsets.txt", "w")
 for i in range(2,maxSize+1):
     f.write("Subset"+str(i)+":[\n")
     subset=(list(itertools.combinations(cities, i)))
