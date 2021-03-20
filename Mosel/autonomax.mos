@@ -3,6 +3,7 @@ model ModelName
   options noimplicit
 
   uses "mmxprs";
+  uses "python3";
 
   parameters
     DataFile = "AutonomaxData.txt";
@@ -30,11 +31,30 @@ model ModelName
     nCore;
   end-initialisations
 
-  function calculate_subsets(n:integer):integer
-    returned:= n*3;
+  function calculate_subsets(n:integer, nCities:integer):integer
+    declarations
+      out: integer;
+      iterations: set of integer;
+      minus_set: set of integer;
+      teller: integer;
+      nevner: integer;
+    end-declarations
+    out := 0;
+    teller :=0;
+    nevner :=0;
+    iterations := 2..floor(n/2);
+
+    forall (i in iterations) do
+      minus_set := 2..(nCities-i);
+      teller := prod(c in (nCities-i+1)..nCities)c;
+      nevner := prod(j in 2..i)j;
+      out += ceil(teller/nevner);
+    end-do
+
+    returned:= out;
   end-function
 
-  nSubsets := 3;
+  nSubsets := calculate_subsets(nCore, nCities);
 
   Cities := 1..nCities;
   Scenarios := 1..nScenarios;
@@ -91,7 +111,7 @@ model ModelName
     const4: dynamic array(Cities) of linctr;
     const5: dynamic array(Cities, Cities) of linctr;
     const6: linctr;
-    const7: dynamic array(Subsets) of linctr;
+    const7: dynamic array(Subsets) of linctr; ! Subtour elimination constraint
     const8: linctr;
     const9: linctr;
     const10: dynamic array(Cities) of linctr;
@@ -121,9 +141,10 @@ model ModelName
   const6 := sum(i in Cities, j in Cities | i <> j)core_edge(i,j) = sum(i in Cities)core_node(i) - (1-Z);
   const8 :=sum(i in Cities)core_node(i)=nCore;
   const9 := sum(i in Cities)control_node(i) = 1;
-  writeln(nCore);
+
+
   setparam('xprs_verbose',true);
-  setparam('xprs_maxtime', -60);
+  setparam('xprs_maxtime', -1);
 
   MinimumCost := sum(i in Cities, j in Cities | i <> j)(10*core_edge(i,j)*Distance(i,j) + 10*sub_edge(i,j) + (0.1*Distance(i,j))^1.5*bandwith(i,j));
   minimize(MinimumCost);
@@ -134,7 +155,7 @@ model ModelName
   writeln("Control center:");
   forall (c in Cities) do
     if (not getsol(control_node(c))=0) then
-      writeln(getsol(control_node(c)));
+      writeln(c);
     end-if
   end-do
 
@@ -150,7 +171,7 @@ model ModelName
   forall (i in Cities) do
     forall (j in Cities | j <> i) do
       if (not getsol(core_edge(i,j))=0) then
-        writeln("(",i,",",j,")");
+        writeln(i,",",j);
       end-if
     end-do
   end-do
@@ -159,7 +180,7 @@ model ModelName
   forall (i in Cities) do
     forall (j in Cities | j <> i) do
       if (not getsol(sub_edge(i,j))=0) then
-        writeln("(",i,",",j,")");
+        writeln(i,",",j);
       end-if
     end-do
   end-do
@@ -175,6 +196,8 @@ model ModelName
 
   fclose(F_OUTPUT);
   writeln("Objective function value:", getobjval);
+
+  pyrun("plot.py");
 
 
 
