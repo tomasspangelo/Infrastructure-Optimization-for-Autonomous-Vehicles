@@ -197,7 +197,17 @@ model ModelName
   fclose(F_OUTPUT);
   writeln("Objective function value:", getobjval);
 
-  pyrun("plot.py");
+  writeln(Z);
+  writeln(sum(i in Cities, j in Cities | i <> j)getsol(core_edge(i,j)));
+    writeln("Arcs in the corenet");
+  forall (i in Cities) do
+    forall (j in Cities | j <> i) do
+      if (not getsol(core_edge(i,j))=0) then
+        writeln(i,",",j);
+      end-if
+    end-do
+  end-do
+  pyrun("run_plot.py");
 
 
 
