@@ -39,18 +39,20 @@ model ModelName
       teller: integer;
       nevner: integer;
     end-declarations
+   
     out := 0;
     teller :=0;
     nevner :=0;
-    iterations := 2..floor(n/2);
-
-    forall (i in iterations) do
-      minus_set := 2..(nCities-i);
-      teller := prod(c in (nCities-i+1)..nCities)c;
-      nevner := prod(j in 2..i)j;
-      out += ceil(teller/nevner);
-    end-do
-
+    if (floor(n/2)>2) then
+      iterations := 2..floor(n/2);
+    
+      forall (i in iterations) do
+        minus_set := 2..(nCities-i);
+        teller := prod(c in (nCities-i+1)..nCities)c;
+        nevner := prod(j in 2..i)j;
+        out += ceil(teller/nevner);
+      end-do
+    end-if
     returned:= out;
   end-function
 
@@ -58,7 +60,9 @@ model ModelName
 
   Cities := 1..nCities;
   Scenarios := 1..nScenarios;
-  Subsets := 1..nSubsets;
+  if (nSubsets > 0) then
+    Subsets := 1..nSubsets;
+  end-if
   finalize(Cities);
   finalize(Scenarios);
   finalize(Subsets);
