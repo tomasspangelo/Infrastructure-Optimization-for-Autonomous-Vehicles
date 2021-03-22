@@ -1,4 +1,3 @@
 import os
 path = os.getcwd().replace(" ","\ ")
-print("Hei")
-os.system(f"python {path}/subset_script.py")
+os.system(f"python3 {path}/subset_script.py")
