@@ -1,10 +1,25 @@
 import itertools
 import numpy as np
 import sys
+nCities = 0
+nCore = 0
+print("hello")
+print("__________________")
+print("__________________")
+print("__________________")
+f = open("AutonomaxData.txt","r")
+line = f.readline()
+while line:
+    line = str(line)
+    if "nCities" in line:
+        nCities = int(line.split(":")[-1].strip())
+    elif "nCore" in line:
+        nCore = int(line.split(":")[-1].strip())
+    line = f.readline()
 
-nCities = int(sys.argv[1])
-nCores = int(sys.argv[2])
-maxSize=int(np.floor(nCores/2))
+f.close()
+
+maxSize=int(np.floor(nCore/2))
 
 cities = np.arange(1, nCities + 1)
 

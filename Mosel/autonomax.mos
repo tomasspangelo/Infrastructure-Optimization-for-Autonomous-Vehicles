@@ -5,9 +5,13 @@ model ModelName
   uses "mmxprs";
   uses "python3";
 
+
+
   parameters
     DataFile = "AutonomaxData.txt";
   end-parameters
+  pyrun("run_subset_script.py");
+
   declarations
     Cities: set of integer;
     Scenarios: set of integer;
@@ -39,13 +43,13 @@ model ModelName
       teller: integer;
       nevner: integer;
     end-declarations
-   
+
     out := 0;
     teller :=0;
     nevner :=0;
     if (floor(n/2)>2) then
       iterations := 2..floor(n/2);
-    
+
       forall (i in iterations) do
         minus_set := 2..(nCities-i);
         teller := prod(c in (nCities-i+1)..nCities)c;
@@ -56,10 +60,13 @@ model ModelName
     returned:= out;
   end-function
 
+
+
   nSubsets := calculate_subsets(nCore, nCities);
 
   Cities := 1..nCities;
   Scenarios := 1..nScenarios;
+
   if (nSubsets > 0) then
     Subsets := 1..nSubsets;
   end-if
@@ -149,7 +156,6 @@ model ModelName
 
   setparam('xprs_verbose',true);
   setparam('xprs_maxtime', -1);
-
   MinimumCost := sum(i in Cities, j in Cities | i <> j)(10*core_edge(i,j)*Distance(i,j) + 10*sub_edge(i,j) + (0.1*Distance(i,j))^1.5*bandwith(i,j));
   minimize(MinimumCost);
 
@@ -211,6 +217,7 @@ model ModelName
       end-if
     end-do
   end-do
+
   pyrun("run_plot.py");
 
 
