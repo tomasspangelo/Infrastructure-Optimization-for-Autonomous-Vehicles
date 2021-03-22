@@ -21,6 +21,7 @@ while line:
 f.close()
 
 maxSize=int(np.floor(nCore/2))
+#maxSize = nCore-1
 nSubsets=0
 cities = np.arange(1, nCities + 1)
 
