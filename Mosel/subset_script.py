@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 import sys
+
 nCities = 0
 nCore = 0
 print("hello")
@@ -20,20 +21,22 @@ while line:
 f.close()
 
 maxSize=int(np.floor(nCore/2))
-
+nSubsets=0
 cities = np.arange(1, nCities + 1)
 
 f = open("subsets.txt", "w")
+f.write("Subsets: [\n")
 for i in range(2,maxSize+1):
-    f.write("Subset"+str(i)+":[\n")
-    subset=(list(itertools.combinations(cities, i)))
-    for set in subset:
+    subsets=(list(itertools.combinations(cities, i)))
+    for set in subsets:
+        nSubsets+=1
         line=""
-        for c in set:
-            line+=str(c)+"\t"
+        for c in cities:
+            if c in set:
+                line+=str(1)+"\t"
+            else: line += str(0)+"\t"
         f.writelines(line+"\n")
-    f.writelines("]\n")
+f.writelines("] \n")
+f.writelines("nSubsets: "+str(nSubsets))
 
 f.close()
-
-
