@@ -56,7 +56,7 @@ e_l = {edge:bandwith[i] for i,edge in enumerate(sub_edges)}
 plt.figure(figsize=(10,5))
 ax = plt.gca()
 ax.set_title(f'Cost: {objval}')
-AllCities = ['Boden','Borås','Eskilstuna','Falun','Gävle''Göteborg','Halmstad','Haparanda','Helsingborg',\
+AllCities = ['Boden','Borås','Eskilstuna','Falun','Gävle','Göteborg','Halmstad','Haparanda','Helsingborg',\
 'Hudiksvall','Jönköping','Kalmar','Karlskrona','Karlstad','Kiruna','Kristianstad','Lidköping',\
 'Linköping','Luleå','Malmö','Motala','Norrköping','Nyköping','Sandviken','Skellefteå',\
 'Skövde','Stockholm','Sundsvall','Trelleborg','Uddevalla',\
