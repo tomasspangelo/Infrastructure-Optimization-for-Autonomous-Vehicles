@@ -63,7 +63,8 @@ AllCities = ['Boden','Borås','Eskilstuna','Falun','Gävle''Göteborg','Halmstad
 'Umeå','Uppsala','Varberg','Vetlanda','Vänersborg',\
 'Västervik','Västerås','Växjö','Örebro','Örnsköldsvik',\
 'Östersund',]
-labels = {i:AllCities[i] for i in range(1,len(AllCities))}
+print(len(AllCities))
+labels = {i+1:AllCities[i] for i in range(len(AllCities))}
 pos = nx.drawing.kamada_kawai_layout(G)
 nx.draw_networkx(G,pos=pos,node_color=color_map,with_labels=True,ax=ax,labels=labels)
 n = nx.draw_networkx_edge_labels(G,pos,edge_labels=e_l,font_color='gray',ax=ax)
