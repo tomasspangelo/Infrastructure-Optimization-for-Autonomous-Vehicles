@@ -16,7 +16,7 @@ subcost = 0
 stop_word = ['Control center:\n', 'Cities in the core net:\n', 'Arcs in the corenet\n', 'Arcs in the subnet\n',
              'Bandwith in the subnet\n', 'Objective function value\n', 'Core net cost\n', "Sub net cost\n"]
 state = ""
-pos = {
+pos_og = {
     29: (1, 0),
     20: (1, 1),
     9: (1, 2),
@@ -59,6 +59,10 @@ pos = {
     8: (8, 22),
     15: (6, 24)
 }
+
+pos = {}
+for key in pos_og:
+    pos[key] = (pos_og[key][1], 8-pos_og[key][0])
 
 with open(plotfile, 'r') as f:
     line = f.readline()
