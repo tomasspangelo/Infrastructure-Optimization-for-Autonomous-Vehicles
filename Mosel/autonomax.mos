@@ -4,9 +4,6 @@ model ModelName
 
   uses "mmxprs";
   uses "python3";
-
-
-
   parameters
     DataFile = "AutonomaxData.txt";
     SubsetFile = "subsets.txt";
@@ -41,35 +38,6 @@ model ModelName
   initialisations from SubsetFile
     nSubsets;
   end-initialisations
-
-  function calculate_subsets(n:integer, nCities:integer):integer
-    declarations
-      out: integer;
-      iterations: set of integer;
-      minus_set: set of integer;
-      teller: integer;
-      nevner: integer;
-    end-declarations
-
-    out := 0;
-    teller :=0;
-    nevner :=0;
-    if (floor(n/2)>2) then
-      iterations := 2..floor(n/2);
-
-      forall (i in iterations) do
-        minus_set := 2..(nCities-i);
-        teller := prod(c in (nCities-i+1)..nCities)c;
-        nevner := prod(j in 2..i)j;
-        out += ceil(teller/nevner);
-      end-do
-    end-if
-    returned:= out;
-  end-function
-
-
-
-  ! nSubsets := calculate_subsets(nCore, nCities);
 
   Cities := 1..nCities;
   Scenarios := 1..nScenarios;
