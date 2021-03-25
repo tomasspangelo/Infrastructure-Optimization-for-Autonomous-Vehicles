@@ -8,7 +8,9 @@ core_edges = []
 sub_edges = []
 bandwith = []
 objval = 0
-stop_word = ['Control center:\n','Cities in the core net:\n', 'Arcs in the corenet\n', 'Arcs in the subnet\n', 'Bandwith in the subnet\n', 'Objective function value\n']
+corecost = 0
+subcost = 0
+stop_word = ['Control center:\n','Cities in the core net:\n', 'Arcs in the corenet\n', 'Arcs in the subnet\n', 'Bandwith in the subnet\n', 'Objective function value\n','Core net cost\n',"Sub net cost\n"]
 state = ""
 
 with open('out.txt','r') as f:
@@ -34,8 +36,12 @@ with open('out.txt','r') as f:
             bandwith.append(float(line))
         if state == stop_word[5]:
             objval=float(line)
+        if state == stop_word[6]:
+            corecost = float(line)
+        if state == stop_word[7]:
+            subcost = float(line)
         line = f.readline()
-
+print(corecost,subcost)
 G = nx.Graph()
 for node in range(1,41+1):
     G.add_node(node)
@@ -66,7 +72,7 @@ AllCities = ['Boden','Borås','Eskilstuna','Falun','Gävle','Göteborg','Halmsta
 
 labels = {i+1:AllCities[i] for i in range(len(AllCities))}
 pos = nx.drawing.kamada_kawai_layout(G)
-nx.draw_networkx(G,pos=pos,node_color=color_map,with_labels=True,ax=ax,labels=labels)
+nx.draw_networkx(G,pos=pos,node_color=color_map,with_labels=True,ax=ax)
 n = nx.draw_networkx_edge_labels(G,pos,edge_labels=e_l,font_color='gray',ax=ax)
 
 plt.show()
