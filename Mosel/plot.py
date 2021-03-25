@@ -1,17 +1,21 @@
 import networkx as nx
+import sys
 import matplotlib.pyplot as plt
-
-
+plotfile = "out.txt"
+if len(sys.argv)==2:
+    plotfile = sys.argv[1]
 control_center = 0
 core_nodes = []
 core_edges = []
 sub_edges = []
 bandwith = []
 objval = 0
-stop_word = ['Control center:\n','Cities in the core net:\n', 'Arcs in the corenet\n', 'Arcs in the subnet\n', 'Bandwith in the subnet\n', 'Objective function value\n']
+corecost = 0
+subcost = 0
+stop_word = ['Control center:\n','Cities in the core net:\n', 'Arcs in the corenet\n', 'Arcs in the subnet\n', 'Bandwith in the subnet\n', 'Objective function value\n','Core net cost\n',"Sub net cost\n"]
 state = ""
 
-with open('out.txt','r') as f:
+with open(plotfile,'r') as f:
     line = f.readline()
 
     while line:
@@ -34,6 +38,11 @@ with open('out.txt','r') as f:
             bandwith.append(float(line))
         if state == stop_word[5]:
             objval=float(line)
+        if state == stop_word[6]:
+            corecost = float(line)
+        if state == stop_word[7]:
+            subcost = float(line)
+
         line = f.readline()
 
 G = nx.Graph()
@@ -55,7 +64,7 @@ for node in G:
 e_l = {edge:bandwith[i] for i,edge in enumerate(sub_edges)}
 plt.figure(figsize=(10,5))
 ax = plt.gca()
-ax.set_title(f'Cost: {objval}')
+ax.set_title(f'Total cost: {objval}, Core-net cost: {corecost},Sub-net cost: {subcost}')
 AllCities = ['Boden','Borås','Eskilstuna','Falun','Gävle','Göteborg','Halmstad','Haparanda','Helsingborg',\
 'Hudiksvall','Jönköping','Kalmar','Karlskrona','Karlstad','Kiruna','Kristianstad','Lidköping',\
 'Linköping','Luleå','Malmö','Motala','Norrköping','Nyköping','Sandviken','Skellefteå',\

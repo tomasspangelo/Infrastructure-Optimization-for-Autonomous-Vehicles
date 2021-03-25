@@ -4,9 +4,6 @@ model ModelName
 
   uses "mmxprs";
   uses "python3";
-
-
-
   parameters
     DataFile = "AutonomaxData.txt";
     SubsetFile = "subsets.txt";
@@ -42,35 +39,6 @@ model ModelName
     nSubsets;
   end-initialisations
 
-  function calculate_subsets(n:integer, nCities:integer):integer
-    declarations
-      out: integer;
-      iterations: set of integer;
-      minus_set: set of integer;
-      teller: integer;
-      nevner: integer;
-    end-declarations
-
-    out := 0;
-    teller :=0;
-    nevner :=0;
-    if (floor(n/2)>2) then
-      iterations := 2..floor(n/2);
-
-      forall (i in iterations) do
-        minus_set := 2..(nCities-i);
-        teller := prod(c in (nCities-i+1)..nCities)c;
-        nevner := prod(j in 2..i)j;
-        out += ceil(teller/nevner);
-      end-do
-    end-if
-    returned:= out;
-  end-function
-
-
-
-  ! nSubsets := calculate_subsets(nCore, nCities);
-
   Cities := 1..nCities;
   Scenarios := 1..nScenarios;
 
@@ -96,6 +64,7 @@ model ModelName
     Subset as "Subsets";
   end-initialisations
 
+  !Declare variables
   declarations
     core_edge: dynamic array(Cities, Cities) of mpvar;
     sub_edge: dynamic array(Cities, Cities) of mpvar;
@@ -104,7 +73,7 @@ model ModelName
     control_node: dynamic array(Cities) of mpvar;
   end-declarations
 
-  ! Create all variables
+  !Create all variables
   forall (c1 in Cities) do
     create(core_node(c1));
     core_node(c1) is_binary;
@@ -125,14 +94,13 @@ model ModelName
       end-if
     end-do
   end-do
-
+  !Declare constraints
   declarations
     ! For all i,j
-    !const1: dynamic array(Cities, Cities) of linctr;
-    const2: dynamic array(Cities, Cities) of linctr;
-    const3: dynamic array(Cities, Cities) of linctr;
+    const1: dynamic array(Cities, Cities) of linctr;
+    const2: dynamic array(Cities) of linctr;
+    const3: dynamic array(Cities) of linctr;
     const4: dynamic array(Cities) of linctr;
-    !const5: dynamic array(Cities, Cities) of linctr;
     const5: dynamic array(Cities) of linctr;
     const6: linctr;
     const7: dynamic array(Subsets) of linctr; ! Subtour elimination constraint
@@ -140,46 +108,41 @@ model ModelName
     const9: linctr;
     const10: dynamic array(Cities) of linctr;
     const11: dynamic array(Cities) of linctr;
-   !const12: dynamic array(Cities) of linctr;
+    const12: dynamic array(Cities,Cities) of linctr;
     MinimumCost: linctr;
   end-declarations
 
+! Create constraints
   forall (s in Subsets) do
+    !Subtour elimination
     const7(s) := sum(i in Cities, j in Cities | i <> j)Subset(s,i)*Subset(s,j)*core_edge(i,j) <= sum(i in Cities)Subset(s, i)-1;
   end-do
 
   forall(i in Cities) do
-    const4(i) := sum(n in Cities | n <> i)sub_edge(n, i) = 1 - core_node(i);
+    !Bandwith flow constraint
+    const2(i) := sum(j in Cities)(bandwith(j,i)-bandwith(i,j)) >=  Scen(Scenario, i)-M*(1-(sum(j in Cities| i<>j)(sub_edge(j,i))));
+    const3(i) := core_node(i) <= sum(j in Cities | j <> i)core_edge(i, j) + sum(j in Cities | j <> i)core_edge(j, i);
+    const4(i) := sum(j in Cities | j <> i)sub_edge(j, i) = 1 - core_node(i);
     const5(i) := sum(j in Cities | j <> i)(0.5*core_edge(j,i)+ 0.5*core_edge(i,j)) <= core_node(i);
     const10(i) := control_node(i) <= core_node(i);
-    const11(i) := sum(n in Cities | n <> i)core_edge(n, i) + sum(n in Cities | n <> i)sub_edge(n, i) + control_node(i) >= 1;
-    !const12(i) := core_node(i) <= sum(n in Cities | n <> i)core_edge(i, n) + sum(n in Cities | n <> i)core_edge(n, i);
-    forall(j in Cities) do
-      if (i <> j) then
-        !const1(i, j) := core_edge(i,j) + sub_edge(i,j) <= 1;
-        const2(i, j) := bandwith(i,j) >= sum(n in Cities | n <> j)bandwith(j,n) + Scen(Scenario, j) - M*(1-sub_edge(i,j));
-        !const3(i, j) := bandwith(i,j) <= M*sub_edge(i,j);
-        ! const5(i,j) := 2*core_edge(i,j) <= core_node(i) + core_node(j); !Old constraint
-      end-if
+    const11(i) := sum(j in Cities | j <> i)core_edge(j, i) + sum(j in Cities | j <> i)sub_edge(j, i) + control_node(i) >= 1;
+    forall (j in Cities) do
+        const1(i,j):=core_edge(i,j)+sub_edge(i,j)<=1;
+        const12(i,j):=bandwith(i,j)<=M*(sub_edge(i,j));
     end-do
   end-do
-
-
-
-  const6 := sum(i in Cities, j in Cities | i <> j)core_edge(i,j) = sum(i in Cities)core_node(i) - (1-Z);
+  const6 := sum(i in Cities, j in Cities | i <> j)core_edge(i,j) = nCore - (1-Z);
   const8 :=sum(i in Cities)core_node(i)=nCore;
   const9 := sum(i in Cities)control_node(i) = 1;
 
-
   setparam('xprs_verbose',true);
   setparam('xprs_miplog', -100);
-  setparam('xprs_maxtime', -4);
+  setparam('xprs_maxtime', -600);
+  setparam('zerotol', 1e-7);
   MinimumCost := sum(i in Cities, j in Cities | i <> j)(10*core_edge(i,j)*Distance(i,j) + 10*sub_edge(i,j) + ((0.1*Distance(i,j))^1.5)*bandwith(i,j));
   minimize(MinimumCost);
 
-
   fopen("out.txt",F_OUTPUT);
-
   writeln("Control center:");
   forall (c in Cities) do
     if (not getsol(control_node(c))=0) then
@@ -193,7 +156,6 @@ model ModelName
       writeln(c);
     end-if
   end-do
-
 
   writeln("Arcs in the corenet");
   forall (i in Cities) do
@@ -223,11 +185,12 @@ model ModelName
   end-do
   writeln("Objective function value");
   writeln(getobjval);
-
+  writeln("Core net cost");
+  writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(core_edge(i,j))*getsol(Distance(i,j))));
+  writeln("Sub net cost");
+  writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(sub_edge(i,j)) + ((0.1*getsol(Distance(i,j)))^1.5)*getsol(bandwith(i,j))));
   fclose(F_OUTPUT);
-  writeln("Objective function value:", getobjval);
-
-   writeln("Control center:");
+  writeln("Control center:");
   forall (c in Cities) do
     if (not getsol(control_node(c))=0) then
       writeln(c);
@@ -240,7 +203,6 @@ model ModelName
       writeln(c);
     end-if
   end-do
-
 
   writeln("Arcs in the corenet");
   forall (i in Cities) do
@@ -264,11 +226,17 @@ model ModelName
   forall (i in Cities) do
     forall (j in Cities | j <> i) do
       if (not getsol(bandwith(i,j))=0) then
-        writeln(i,",",j,": ",getsol(bandwith(i,j)));
+        writeln(getsol(bandwith(i,j)));
       end-if
     end-do
   end-do
-
+  writeln("Objective function value");
+  writeln(getobjval);
+  writeln("Core net cost");
+  writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(core_edge(i,j))*getsol(Distance(i,j))));
+  writeln("Sub net cost");
+  writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(sub_edge(i,j)) + ((0.1*getsol(Distance(i,j)))^1.5)*getsol(bandwith(i,j))));
+  !Plot the result
   pyrun("run_plot.py");
 
 
