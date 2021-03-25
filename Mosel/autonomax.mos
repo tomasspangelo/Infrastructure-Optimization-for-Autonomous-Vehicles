@@ -177,6 +177,7 @@ model ModelName
   setparam('xprs_verbose',true);
   setparam('xprs_miplog', -100);
   setparam('xprs_maxtime', -2200);
+  setparam('zerotol', 1e-7);
   MinimumCost := sum(i in Cities, j in Cities | i <> j)(10*core_edge(i,j)*Distance(i,j) + 10*sub_edge(i,j) + ((0.1*Distance(i,j))^1.5)*bandwith(i,j));
   minimize(MinimumCost);
 
