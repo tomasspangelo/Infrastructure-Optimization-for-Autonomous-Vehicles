@@ -1,7 +1,9 @@
 import networkx as nx
+import sys
 import matplotlib.pyplot as plt
-
-
+plotfile = "out.txt"
+if len(sys.argv)==2:
+    plotfile = sys.argv[1]
 control_center = 0
 core_nodes = []
 core_edges = []
@@ -13,7 +15,7 @@ subcost = 0
 stop_word = ['Control center:\n','Cities in the core net:\n', 'Arcs in the corenet\n', 'Arcs in the subnet\n', 'Bandwith in the subnet\n', 'Objective function value\n','Core net cost\n',"Sub net cost\n"]
 state = ""
 
-with open('out.txt','r') as f:
+with open(plotfile,'r') as f:
     line = f.readline()
 
     while line:
@@ -40,8 +42,9 @@ with open('out.txt','r') as f:
             corecost = float(line)
         if state == stop_word[7]:
             subcost = float(line)
+
         line = f.readline()
-print(corecost,subcost)
+
 G = nx.Graph()
 for node in range(1,41+1):
     G.add_node(node)
@@ -61,7 +64,7 @@ for node in G:
 e_l = {edge:bandwith[i] for i,edge in enumerate(sub_edges)}
 plt.figure(figsize=(10,5))
 ax = plt.gca()
-ax.set_title(f'Cost: {objval}')
+ax.set_title(f'Total cost: {objval}, Core-net cost: {corecost},Sub-net cost: {subcost}')
 AllCities = ['Boden','Borås','Eskilstuna','Falun','Gävle','Göteborg','Halmstad','Haparanda','Helsingborg',\
 'Hudiksvall','Jönköping','Kalmar','Karlskrona','Karlstad','Kiruna','Kristianstad','Lidköping',\
 'Linköping','Luleå','Malmö','Motala','Norrköping','Nyköping','Sandviken','Skellefteå',\
@@ -72,7 +75,7 @@ AllCities = ['Boden','Borås','Eskilstuna','Falun','Gävle','Göteborg','Halmsta
 
 labels = {i+1:AllCities[i] for i in range(len(AllCities))}
 pos = nx.drawing.kamada_kawai_layout(G)
-nx.draw_networkx(G,pos=pos,node_color=color_map,with_labels=True,ax=ax)
+nx.draw_networkx(G,pos=pos,node_color=color_map,with_labels=True,ax=ax,labels=labels)
 n = nx.draw_networkx_edge_labels(G,pos,edge_labels=e_l,font_color='gray',ax=ax)
 
 plt.show()
