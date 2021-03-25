@@ -4,6 +4,7 @@ import sys
 
 nCities = 0
 nCore = 0
+Z = 0 
 print("hello")
 print("__________________")
 print("__________________")
@@ -16,12 +17,15 @@ while line:
         nCities = int(line.split(":")[-1].strip())
     elif "nCore" in line:
         nCore = int(line.split(":")[-1].strip())
+    elif "Z" in line:
+        Z = int(line.split(":")[-1].strip())
     line = f.readline()
 
 f.close()
-
-maxSize=int(np.floor(nCore/2))
-#maxSize = nCore-1
+if Z==1:
+    maxSize=int(np.floor(nCore/2))
+if Z==0:
+    maxSize=nCore-1
 nSubsets=0
 cities = np.arange(1, nCities + 1)
 
