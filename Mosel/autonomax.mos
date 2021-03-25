@@ -120,7 +120,7 @@ model ModelName
 
   forall(i in Cities) do
     !Bandwith flow constraint
-    const2(i) := sum(j in Cities)(bandwith(j,i)-bandwith(i,j)) >=  Scen(Scenario, i)-M*core_node(i);
+    const2(i) := sum(j in Cities)(bandwith(j,i)-bandwith(i,j)) >=  Scen(Scenario, i)-M*(1-(sum(j in Cities| i<>j)(sub_edge(j,i))));
     const3(i) := core_node(i) <= sum(j in Cities | j <> i)core_edge(i, j) + sum(j in Cities | j <> i)core_edge(j, i);
     const4(i) := sum(j in Cities | j <> i)sub_edge(j, i) = 1 - core_node(i);
     const5(i) := sum(j in Cities | j <> i)(0.5*core_edge(j,i)+ 0.5*core_edge(i,j)) <= core_node(i);
@@ -131,7 +131,7 @@ model ModelName
         const12(i,j):=bandwith(i,j)<=M*(sub_edge(i,j));
     end-do
   end-do
-  const6 := sum(i in Cities, j in Cities | i <> j)core_edge(i,j) = sum(i in Cities)core_node(i) - (1-Z);
+  const6 := sum(i in Cities, j in Cities | i <> j)core_edge(i,j) = nCore - (1-Z);
   const8 :=sum(i in Cities)core_node(i)=nCore;
   const9 := sum(i in Cities)control_node(i) = 1;
 
@@ -190,9 +190,7 @@ model ModelName
   writeln("Sub net cost");
   writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(sub_edge(i,j)) + ((0.1*getsol(Distance(i,j)))^1.5)*getsol(bandwith(i,j))));
   fclose(F_OUTPUT);
-  writeln("Objective function value:", getobjval);
-
-   writeln("Control center:");
+  writeln("Control center:");
   forall (c in Cities) do
     if (not getsol(control_node(c))=0) then
       writeln(c);
@@ -205,7 +203,6 @@ model ModelName
       writeln(c);
     end-if
   end-do
-
 
   writeln("Arcs in the corenet");
   forall (i in Cities) do
@@ -225,16 +222,21 @@ model ModelName
     end-do
   end-do
 
-! Maybe something wrong here
   writeln("Bandwith in the subnet");
   forall (i in Cities) do
     forall (j in Cities | j <> i) do
       if (not getsol(bandwith(i,j))=0) then
-        writeln(i,",",j,": ",getsol(bandwith(i,j)));
+        writeln(getsol(bandwith(i,j)));
       end-if
     end-do
   end-do
-
+  writeln("Objective function value");
+  writeln(getobjval);
+  writeln("Core net cost");
+  writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(core_edge(i,j))*getsol(Distance(i,j))));
+  writeln("Sub net cost");
+  writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(sub_edge(i,j)) + ((0.1*getsol(Distance(i,j)))^1.5)*getsol(bandwith(i,j))));
+  !Plot the result
   pyrun("run_plot.py");
 
 
