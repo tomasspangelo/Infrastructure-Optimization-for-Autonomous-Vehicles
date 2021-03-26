@@ -109,6 +109,8 @@ model ModelName
     const10: dynamic array(Cities) of linctr;
     const11: dynamic array(Cities) of linctr;
     const12: dynamic array(Cities,Cities) of linctr;
+    !Comment this in to lock control center to Östersund
+    !const13: linctr;
     MinimumCost: linctr;
   end-declarations
 
@@ -134,7 +136,8 @@ model ModelName
   const6 := sum(i in Cities, j in Cities | i <> j)core_edge(i,j) = nCore - (1-Z);
   const8 :=sum(i in Cities)core_node(i)=nCore;
   const9 := sum(i in Cities)control_node(i) = 1;
-
+!Comment this in to lock control cetner to Östersund  
+!const13 := control_node(41) =1;
   setparam('xprs_verbose',true);
   setparam('xprs_miplog', -100);
   setparam('xprs_maxtime', -600);
