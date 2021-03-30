@@ -32,9 +32,8 @@ The folder `/Mosel` contains everything that is related to the implementation of
  1. Open the `autonomax.mos` file in Xpress Workbench (or any other IVE/IDE that let's you run mosel code).
  2. Before you run the model in Xpress, you need to make sure that you have the latest version of the programming language [Python](https://www.python.org/) installed on your computer.
  3. The python scripts that will be directly called from `autonomax.mos` in Xpress have some dependencies that you need to install. These requirements can be found in the file  `requirements.txt`. Use your favorite package manager/installer to install the requirements, we recommend using [pip](https://pypi.org/project/pip/). To install the requirements, run the following command **in the root folder of the project** (where `requirements.txt` is located):
- 
+	 
 	 `pip install -r requirements.txt`
-
 4. Now you should be all set. Run the model by clicking `Run`.  Relevant information about the solution will be printed to the console, as well as written to `/Mosel/out.txt`.  The python script `plot.py` will use this output file to display a graphical network plot of the solution.
 
 ### 2.1 If you get an error and cannot run the model properly 
