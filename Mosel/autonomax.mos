@@ -1,20 +1,21 @@
-model ModelName
+model Autonomax
   options explterm
   options noimplicit
 
   uses "mmxprs";
-  uses "python3";
+  uses "python3"; ! Xpress package for running python files
+
   parameters
-    DataFile = "AutonomaxData.txt";
-    SubsetFile = "subsets.txt";
+    DataFile = "AutonomaxData.txt"; ! Data provided
+    SubsetFile = "subsets.txt"; ! File containing subsets
     M = 125; ! Big M used for bandwith constraints
     Scenario = 1; ! Scenario to be used
-    NC = 3; ! Number of cities in core net
-    Z = 1;
+    NC = 4; ! Number of cities in core net
+    Z = 1; ! 1 if Cyclic, 0 if path
   end-parameters
 
   ! Calculate the subsets
-  pyrun("run_subset_script.py");
+  pyrun("run_subset_script.py"); ! Comment/remove this line if you encounter problems
 
   declarations
     Cities: set of integer;
@@ -51,22 +52,24 @@ model ModelName
     Subset: array(Subsets, Cities) of integer;
   end-declarations
 
+  ! Initialize distance and scenario array from DataFile
   initialisations from DataFile
     Distance;
     Scen;
   end-initialisations
 
+  ! Initialize subset array from subsetfile
   initialisations from SubsetFile
     Subset as "Subsets";
   end-initialisations
 
   !Declare variables
   declarations
-    core_edge: dynamic array(Cities, Cities) of mpvar;
-    sub_edge: dynamic array(Cities, Cities) of mpvar;
-    bandwith: dynamic array(Cities, Cities) of mpvar;
-    core_node: dynamic array(Cities) of mpvar;
-    control_node: dynamic array(Cities) of mpvar;
+    core_edge: dynamic array(Cities, Cities) of mpvar; ! x(i,j)
+    sub_edge: dynamic array(Cities, Cities) of mpvar; ! y(i,j)
+    bandwith: dynamic array(Cities, Cities) of mpvar; ! b(i,j)
+    core_node: dynamic array(Cities) of mpvar; ! w(i)
+    control_node: dynamic array(Cities) of mpvar; ! s(i)
   end-declarations
 
   !Create all variables
@@ -90,22 +93,22 @@ model ModelName
       end-if
     end-do
   end-do
-  !Declare constraints
+
+  !Declare constraints, (n) refers to number in report
   declarations
-    ! For all i,j
-    const1: dynamic array(Cities, Cities) of linctr;
-    const2: dynamic array(Cities) of linctr;
-    const3: dynamic array(Cities) of linctr;
-    const4: dynamic array(Cities) of linctr;
-    const5: dynamic array(Cities) of linctr;
-    const6: linctr;
-    const7: dynamic array(Subsets) of linctr; ! Subtour elimination constraint
-    const8: linctr;
-    const9: linctr;
-    const10: dynamic array(Cities) of linctr;
-    const11: dynamic array(Cities) of linctr;
-    const12: dynamic array(Cities,Cities) of linctr;
-    MinimumCost: linctr;
+    const1: dynamic array(Cities, Cities) of linctr; ! Constraint (2), at most one edge between cities
+    const2: dynamic array(Cities) of linctr; ! Constraint (3), bandwith flow constraint
+    const3: dynamic array(Cities) of linctr; ! Constraint (4), core net connectivity constraint
+    const4: dynamic array(Cities) of linctr; ! Constraint (5), no incoming sub net edges for core nodes
+    const5: dynamic array(Cities) of linctr; ! Constraint (6), force to core node if incoming or outgoing core edge
+    const6: linctr; ! Constraint (7), correct number of core edges
+    const7: dynamic array(Subsets) of linctr; ! Constraint (8), subtour elimination constraint
+    const8: linctr; ! Constraint (9), ensures correct number of core nodes
+    const9: linctr; ! Constraint (10), only one control center node
+    const10: dynamic array(Cities) of linctr; ! Constraint (11), control center node must be core node
+    const11: dynamic array(Cities) of linctr; ! Constraint (12), all nodes have a parent except control center node
+    const12: dynamic array(Cities,Cities) of linctr; ! Constraint (13), only sub edges have assigned bandwith
+    MinimumCost: linctr; ! (1), objective function
   end-declarations
 
 ! Create constraints
@@ -135,11 +138,12 @@ model ModelName
   setparam('xprs_verbose',true);
   setparam('xprs_miplog', -100);
   setparam('xprs_maxtime', -600);
-  setparam('zerotol', 1e-7);
+  setparam('zerotol', 1e-7); ! Set zero tolerance to small (positive) number
   MinimumCost := sum(i in Cities, j in Cities | i <> j)(10*core_edge(i,j)*Distance(i,j) + 10*sub_edge(i,j) + ((0.1*Distance(i,j))^1.5)*bandwith(i,j));
   minimize(MinimumCost);
   !minimize(XPRS_LPSTOP,MinimumCost); ! Minimize LP Relaxation, plot will not work
 
+  ! Write results to out.txt
   fopen("out.txt",F_OUTPUT);
   writeln("Control center:");
   forall (c in Cities) do
@@ -188,6 +192,8 @@ model ModelName
   writeln("Sub net cost");
   writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(sub_edge(i,j)) + ((0.1*getsol(Distance(i,j)))^1.5)*getsol(bandwith(i,j))));
   fclose(F_OUTPUT);
+
+  ! Write results to console
   writeln("Control center:");
   forall (c in Cities) do
     if (not getsol(control_node(c))=0) then
@@ -234,12 +240,10 @@ model ModelName
   writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(core_edge(i,j))*getsol(Distance(i,j))));
   writeln("Sub net cost");
   writeln(sum(i in Cities, j in Cities | i <> j)(10*getsol(sub_edge(i,j)) + ((0.1*getsol(Distance(i,j)))^1.5)*getsol(bandwith(i,j))));
-  !Plot the result
-  pyrun("run_plot.py");
 
 
-
-
+  ! Plot the result
+  pyrun("run_plot.py"); ! Comment/remove this line if you encounter problems
 
 end-model
 
