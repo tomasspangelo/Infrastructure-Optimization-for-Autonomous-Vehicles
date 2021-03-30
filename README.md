@@ -1,5 +1,4 @@
 # Infrastructure Optimization for Autonomous Vehicles
-README file for github repository https://github.com/tomasspangelo/infrastructure-optimization-for-autonomous-vehicles
 ## 1 File structure
 The file structure of this project can be visualized in the following tree:
 ```
