@@ -19,13 +19,13 @@ Infrastructure-Optimization-for-Autonomous-Vehicles
 |   |	subset_script.py
 |   |	subsets.txt
 |
-└───Kjoeringer
+└───Runs
     │   cycle3.txt
     │   cycle4scen2.txt
     │	...
 ```
 
-The folder `/Mosel` contains everything that is related to the implementation of the mathematical model, which includes the Mosel implementation, supplementary python scripts, data files, output files etc. The folder `/Kjoeringer` contains the history of saved output files (same format as out.txt) from runs with different parameter settings which includes all of the information that is relevant to the solution for the given run. 
+The folder `/Mosel` contains everything that is related to the implementation of the mathematical model, which includes the Mosel implementation, supplementary python scripts, data files, output files etc. The folder `/Runs` contains the history of saved output files (same format as out.txt) from runs with different parameter settings which includes all of the information that is relevant to the solution for the given run. If the filename contains "no" (not optimal) it is not solved to optimality, and if scen[number] is not specified in the filename then Scenario=1. 
 
 ## 2 How to run the model locally
 
