@@ -4,21 +4,27 @@ import sys
 
 nCities = 0
 nCore = 0
-Z = 0 
-print("hello")
-print("__________________")
-print("__________________")
-print("__________________")
+Z = 0
+
+
 f = open("AutonomaxData.txt","r")
 line = f.readline()
 while line:
     line = str(line)
     if "nCities" in line:
         nCities = int(line.split(":")[-1].strip())
-    elif "nCore" in line:
-        nCore = int(line.split(":")[-1].strip())
+        break
+f.close()
+
+f = open("autonomax.mos","r")
+line = f.readline()
+while line:
+    line = str(line)
+    if "NC" in line:
+        nCore = int(line.split(";")[0].split("=")[-1].strip())
     elif "Z" in line:
-        Z = int(line.split(":")[-1].strip())
+        Z = int(line.split(";")[0].split("=")[-1].strip())
+        break
     line = f.readline()
 
 f.close()
